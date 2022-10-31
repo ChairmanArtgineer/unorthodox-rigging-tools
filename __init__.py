@@ -12,6 +12,7 @@ from .mixamorenamer import RENAME_OT_Mtob
 from .mixamorenamer import RENAME_OT_Btom
 from .constains import RemoveConsOperator
 from .parenting import ParentPoseMode
+from.constains import remove_c_name
 
 
 
@@ -26,14 +27,18 @@ class VIEW3D_main_UI(bpy.types.Panel):
             layout = self.layout
 
             row = layout.row()
-            col = layout.column(align=True)
+            col = layout.column()
             row.label(text="constrains", translate=False)
             col.operator('remove.all_constrains',
                                  icon = 'CONSTRAINT_BONE')
-
+            col.separator()
+            col.operator('removec.name',
+                             icon = 'CONSTRAINT_BONE')
+            col.prop(context.scene, 'Cons_name')
+            col.separator()
             row = layout.row()
             col = layout.column(align=True)
-            row.label(text="parenting", translate=False)
+            row.label(text="parenting ", translate=False)
             col.operator('parent.posemode',
                                 icon = 'BONE_DATA')
             col.prop(context.scene, 'ConnectBones')
@@ -60,7 +65,8 @@ VIEW3D_MixamoUI,
 RENAME_OT_Mtob,
 RENAME_OT_Btom,
 RemoveConsOperator,
-ParentPoseMode
+ParentPoseMode,
+remove_c_name
 ]
 
 def register():

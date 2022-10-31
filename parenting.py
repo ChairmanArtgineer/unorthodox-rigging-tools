@@ -34,7 +34,7 @@ class ParentPoseMode(bpy.types.Operator):
 
         return {'FINISHED'}
 
-
+bpy.types.Scene.Cname = bpy.props.StringProperty()
 
 
 
