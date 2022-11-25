@@ -24,6 +24,10 @@ class VIEW3D_main_UI(bpy.types.Panel):
     bl_label = "very unorthodox rigg tools"
     bl_idname = "MAIN_UI"
     bl_order = 0
+
+    @classmethod
+    def poll(cls, context):
+        return context.object.mode == 'POSE'
     def draw(self, context):
             pass
 
@@ -64,12 +68,13 @@ class VIEW3D_parenting_UI(bpy.types.Panel):
    # bl_options = {'HIDE_HEADER'}
 
     def draw(self, context):
-        layout = self.layout
-        col = layout.column(align=True)
-        # row.label(text="parenting ", translate=False)
-        col.operator('parent.posemode',
-                     icon='BONE_DATA')
-        col.prop(context.scene, 'ConnectBones')
+        if (bpy.context.mode == 'POSE'):
+            layout = self.layout
+            col = layout.column(align=True)
+            # row.label(text="parenting ", translate=False)
+            col.operator('parent.posemode',
+                         icon='BONE_DATA')
+            col.prop(context.scene, 'ConnectBones')
         pass
 class VIEW3D_MixamoUI(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
@@ -77,7 +82,9 @@ class VIEW3D_MixamoUI(bpy.types.Panel):
     bl_category = "anti autodesk tools"
     bl_label = "mixamo renamer"
     bl_order = 1
-
+    @classmethod
+    def poll(cls, context):
+        return context.object.mode == 'POSE'
     def draw(self, context):
         if (bpy.context.mode == 'POSE'):
             self.layout.operator('rename.mixtoblend',
@@ -114,6 +121,5 @@ def unregister():
 
 
 if __name__ == "__main__":
-    register()
-
+        register()
 
