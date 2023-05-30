@@ -66,6 +66,39 @@ class RENAME_OT_Btom(bpy.types.Operator):
 
         return {'FINISHED'}
 
+class VIEW3D_MixamoUI(bpy.types.Panel):
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = "anti autodesk tools"
+    bl_label = "mixamo renamer"
+    bl_order = 1
+    @classmethod
+    def poll(cls, context):
+        return context.object.mode == 'POSE'
+    def draw(self, context):
+        if (bpy.context.mode == 'POSE'):
+            self.layout.operator('rename.mixtoblend',
+                                 icon = 'BLENDER')
+            self.layout.operator('rename.blendtomix',
+                                 icon = 'EVENT_M')
+            pass
+BlenderClasses = [
+RENAME_OT_Btom,
+RENAME_OT_Mtob,
+VIEW3D_MixamoUI
+]
+
+def register():
+    for blender_class in BlenderClasses:
+        bpy.utils.register_class(blender_class)
+
+
+def unregister():
+    for blender_class in BlenderClasses:
+        bpy.utils.unregister_class(blender_class)
+
+
+
 
 
 
