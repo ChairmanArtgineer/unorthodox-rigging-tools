@@ -11,6 +11,7 @@ import bpy
 
 from . import constains
 from . import mixamorenamer
+from . import sinewaveMaker
 
 
 
@@ -24,7 +25,7 @@ class VIEW3D_main_UI(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.object.mode == 'POSE'
+        return context.object.type == 'ARMATURE'
     def draw(self, context):
             pass
 
@@ -41,12 +42,14 @@ def register():
         bpy.utils.register_class(blender_class)
     constains.register()
     mixamorenamer.register()
+    sinewaveMaker.register()
 
 def unregister():
     for blender_class in BlenderClasses:
         bpy.utils.unregister_class(blender_class)
     constains.unregister()
     mixamorenamer.unregister()
+    sinewaveMaker.unregister()
     print("hello world")
 
 

@@ -2,8 +2,16 @@ import bpy
 
 def create_dupeBones(obj,selection, prefix, newp):
     if obj.type == 'ARMATURE' and obj.mode == 'EDIT':
-        # iterate through each selected bone
-        for bone in selection:
+
+        # if single bone append to list
+        if isinstance(selection, bpy.types.EditBone):
+            selectedBones = []
+            selectedBones.append(selection)
+        else:
+            # equal list
+            selectedBones = selection
+
+        for bone in selectedBones:
             # create new bone with prefix
             new_bone_name = prefix + bone.name
             new_bone = obj.data.edit_bones.new(new_bone_name)
@@ -51,12 +59,16 @@ def find_Tail(selection):
             pass
         else:
             print("found tail of the chain", bone.name)
+            return bone
 
 
 def select_ByConstraint(selection, cname):
+    bones = []
     for bone in selection:
         if cname in bone.constraints:
             print("keep")
         else:
             bpy.context.active_object.data.bones[bone.name].select = False
+            bones.apend(bone)
+
 
