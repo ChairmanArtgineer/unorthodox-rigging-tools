@@ -1,58 +1,8 @@
 import bpy
 from rigify.utils import mechanism as mecha
-nbons = 20
+from . import boneFunctions as bnf
 
-
-
-def create_dupeBones(selection, prefix, newp):
-    obj = bpy.context.active_object
-    if obj.type == 'ARMATURE' and obj.mode == 'EDIT': 
-          
-        # if single bone append to list
-        if isinstance(selection, bpy.types.EditBone):
-            selectedBones = []
-            selectedBones.append(selection)
-        else:
-            #equal list
-            selectedBones = selection
-            
-        for bone in selectedBones:
-            # create new bone with prefix
-            new_bone_name = prefix + bone.name
-            new_bone = obj.data.edit_bones.new(new_bone_name)
-            #copy rest data from bone to new bone
-            new_bone.head = bone.head
-            new_bone.tail = bone.tail
-            new_bone.roll = bone.roll
-            if newp:
-                if bone.parent:
-                    new_bone.parent = obj.data.edit_bones[prefix + bone.parent.name]
-                    new_bone.use_connect = bone.use_connect
-                else:
-                    pass
-            else:
-                if bone.parent:
-                    new_bone.parent = obj.data.edit_bones[bone.parent.name]
-                    new_bone.use_connect = bone.use_connect 
-            #select only the new chain
-    
-
-def find_Head(selection):
-    for bone in selection:
-        if bone.parent in selection:
-            pass
-        else:
-            print("found end of the chain",bone.name)
-            return bone   
-    
-    
-    
-    
-                
-   #start of the function      
-#set tedit mode if not
-def create_WaveTail(selection,dsp,sprl,freq):
-    obj = bpy.context.active_object
+def create_WaveTail(obj,selection,dsp,sprl,freq):
     pbns = obj.pose.bones
 
     if (bpy.context.mode == "EDIT_ARMATURE"):
@@ -60,9 +10,13 @@ def create_WaveTail(selection,dsp,sprl,freq):
     else: 
        bpy.ops.object.mode_set(mode='EDIT')
         
-    #subdivide bone chain
-    endBone = find_Head(selection)
-    create_dupeBones(endBone, "CTRL_", True)
+    #find head and create ctrl bone
+    endBone = bnf.find_Head(selection)
+    bnf.create_dupeBones(obj,endBone, "CTRL_", True)
+
+    #set rotation mode
+    for bone in bpy.context.selected_editable_bones:
+        bone.use_inherit_rotation = False
 
     #go back to pose
     bpy.ops.object.mode_set(mode='POSE')
@@ -73,8 +27,11 @@ def create_WaveTail(selection,dsp,sprl,freq):
     
      #extra bones for other functions
     dspBone = pbns[dsp]
+    dspBone.rotation_mode = 'XYZ'
     sprlBone = pbns[sprl]
+    sprlBone.rotation_mode = 'XYZ'
     freqBone = pbns[freq]
+    freqBone.rotation_mode = 'XYZ'
     print("extrabones added")
     
     #create custom properties for the end bone and ad its driver
@@ -95,7 +52,6 @@ def create_WaveTail(selection,dsp,sprl,freq):
     print("properties added to:", endBone.name)
     
 
-  
     
 
     #set driver for each bone in the chain
@@ -103,7 +59,7 @@ def create_WaveTail(selection,dsp,sprl,freq):
 
     for bone in bpy.context.selected_pose_bones:
         #set parenting relations
-        use_inherit_rotation = False
+
         
         #find lenght of the chain
         l = len(bpy.context.selected_pose_bones)
@@ -199,6 +155,38 @@ def create_WaveTail(selection,dsp,sprl,freq):
     
     print("ajoy matey, generation successfully")
         
-create_WaveTail(bpy.context.selected_editable_bones,"displace","spiral","shape N' Amp")
-    
-       
+#create_WaveTail(bpy.context.selected_editable_bones,"displace","spiral","shape N' Amp")
+
+class create_WaveTailOperator(bpy.types.Operator):
+    """creates  wavetail rig to control chain bones """
+    bl_idname = "create.wavetail"
+    bl_label = "create sine-wave tail"
+
+    dsp_bone: bpy.props.StringProperty()
+    sprl_bone: bpy.props.StringProperty()
+    freq_bone: bpy.props.StringProperty()
+
+
+    def execute(self, context):
+
+        if self.dsp_bone and self.sprl_bone and self.freq_bone:
+            create_WaveTail(context.object, bpy.context.selected_editable_bones, self.dsp_bone, self.sprl_bone,self.freq_bone)
+            self.report({'INFO'}, "generated successfurlly yarr!" )
+        else:
+            self.report({'INFO'}, "something wrong matey?")
+
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self, width=400)
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Select  bones:")
+        layout.prop_search(self, "dsp_bone", context.object.data, "bones", text="displace bone")
+        layout.prop_search(self, "sprl_bone", context.object.data, "bones", text="spiral bone")
+        layout.prop_search(self, "freq_bone", context.object.data, "bones", text="freq bone")
+
+
+

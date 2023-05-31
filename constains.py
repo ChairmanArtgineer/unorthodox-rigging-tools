@@ -61,7 +61,9 @@ class VIEW3D_constraint_UI(bpy.types.Panel):
     bl_category = "anti autodesk tools"
     bl_label = "constraint related"
    # bl_options = {'HIDE_HEADER'}
-
+    @classmethod
+    def poll(cls, context):
+        return context.object.mode == 'POSE'
     def draw(self, context):
         if (bpy.context.mode == 'POSE'):
 
@@ -77,7 +79,8 @@ class VIEW3D_constraint_UI(bpy.types.Panel):
                          icon='CONSTRAINT_BONE')
             col.operator('select.byc',
                          icon='CONSTRAINT_BONE')
-            col.prop(context.scene.constraintProps,'cname')
+            #col.prop(context.scene.constraintProps,'cname')
+            col.prop_search(context.scene.constraintProps, "cname", context.active_pose_bone, "constraints", text="")
 
 
 
