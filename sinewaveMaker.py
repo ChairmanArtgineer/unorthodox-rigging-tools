@@ -158,7 +158,7 @@ def create_WaveTail(obj,selection,dsp,sprl,freq):
 #create_WaveTail(bpy.context.selected_editable_bones,"displace","spiral","shape N' Amp")
 
 class create_WaveTailOperator(bpy.types.Operator):
-
+    """creates  wavetail rig to control chain bones """
     bl_idname = "create.wavetail"
     bl_label = "create sine-wave tail"
 
@@ -168,7 +168,6 @@ class create_WaveTailOperator(bpy.types.Operator):
 
 
     def execute(self, context):
-        #obj = bpy.context.active_object
 
         if self.dsp_bone and self.sprl_bone and self.freq_bone:
             create_WaveTail(context.object, bpy.context.selected_editable_bones, self.dsp_bone, self.sprl_bone,self.freq_bone)
@@ -184,44 +183,10 @@ class create_WaveTailOperator(bpy.types.Operator):
 
     def draw(self, context):
         layout = self.layout
-        layout.label(text="Select a bone:")
+        layout.label(text="Select  bones:")
         layout.prop_search(self, "dsp_bone", context.object.data, "bones", text="displace bone")
         layout.prop_search(self, "sprl_bone", context.object.data, "bones", text="spiral bone")
         layout.prop_search(self, "freq_bone", context.object.data, "bones", text="freq bone")
 
-class VIEW3D_WaveTail_UI(bpy.types.Panel):
-    bl_space_type = 'VIEW_3D'
-    bl_region_type = 'UI'
-    bl_parent_id = "MAIN_UI"
-    bl_category = "anti autodesk tools"
-    bl_label = "shelf related"
-   # bl_options = {'HIDE_HEADER'}
-    @classmethod
-    def poll(cls, context):
-        return context.object.mode == 'EDIT'
-    def draw(self, context):
 
-
-        layout = self.layout
-        col = layout.column()
-        col.operator('create.wavetail',
-                     icon='CONSTRAINT_BONE')
-
-        col.separator()
-        row = layout.row()
-        col = layout.column(align=True)
-        pass
-BlenderClasses = [
-VIEW3D_WaveTail_UI,
-create_WaveTailOperator
-]
-
-def register():
-    for blender_class in BlenderClasses:
-        bpy.utils.register_class(blender_class)
-
-def unregister():
-
-    for blender_class in BlenderClasses:
-        bpy.utils.unregister_class(blender_class)
 

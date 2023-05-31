@@ -12,6 +12,7 @@ import bpy
 from . import constains
 from . import mixamorenamer
 from . import sinewaveMaker
+from . import simpleGeneration
 
 
 
@@ -42,14 +43,14 @@ def register():
         bpy.utils.register_class(blender_class)
     constains.register()
     mixamorenamer.register()
-    sinewaveMaker.register()
+    simpleGeneration.register()
 
 def unregister():
     for blender_class in BlenderClasses:
         bpy.utils.unregister_class(blender_class)
     constains.unregister()
     mixamorenamer.unregister()
-    sinewaveMaker.unregister()
+    simpleGeneration.unregister()
     print("hello world")
 
 
