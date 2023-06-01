@@ -48,7 +48,7 @@ class VIEW3D_parenting_UI(bpy.types.Panel):
         if (bpy.context.mode == 'POSE'):
             layout = self.layout
             col = layout.column(align=True)
-            row.label(text="shelf ", translate=False)
+            col.row().label(text="shelf ", translate=False)
             col.operator('parent.posemode',
                          icon='BONE_DATA')
             col.prop(context.scene, 'ConnectBones')

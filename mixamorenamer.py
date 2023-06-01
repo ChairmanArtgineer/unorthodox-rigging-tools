@@ -45,7 +45,7 @@ def Mixamo_TO_Blender_Fnc(BlendBones):
 
 
 class RENAME_OT_Mtob(bpy.types.Operator):
-    """renames all mixamo bones to blender name conventions"""
+    """renames all SELECTED mixamo bones to blender name conventions"""
     bl_idname = 'rename.mixtoblend'
     bl_label = "rename to blender"
 
@@ -55,7 +55,7 @@ class RENAME_OT_Mtob(bpy.types.Operator):
 
         return {'FINISHED'}
 class RENAME_OT_Btom(bpy.types.Operator):
-    """renames all blener bones to mixamo name conventions"""
+    """renames all SELECTED blener bones to mixamo name conventions"""
     bl_idname = 'rename.blendtomix'
     bl_label = "rename to mixamo"
 

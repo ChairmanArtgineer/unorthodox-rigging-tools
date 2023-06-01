@@ -11,7 +11,6 @@ import bpy
 
 from . import constains
 from . import mixamorenamer
-from . import sinewaveMaker
 from . import simpleGeneration
 
 

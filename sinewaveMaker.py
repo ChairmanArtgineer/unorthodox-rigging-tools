@@ -2,7 +2,8 @@ import bpy
 from rigify.utils import mechanism as mecha
 from . import boneFunctions as bnf
 
-def create_WaveTail(obj,selection,dsp,sprl,freq):
+
+def create_WaveTail(obj,selection,dsp,sprl,freq,main,second):
     pbns = obj.pose.bones
 
     if (bpy.context.mode == "EDIT_ARMATURE"):
@@ -46,10 +47,35 @@ def create_WaveTail(obj,selection,dsp,sprl,freq):
     varr.targets[0].data_path = sprlBone.path_from_id('rotation_euler') + "[1]"
     d.update()
     mecha.make_property(endBone, name = "amp", default = 0.0, min=-2, max=2,overridable=True)
-    mecha.make_property(endBone, name = "c_amp", default = 0.0, min=-2, max=2,overridable=True) 
+    d = endBone.driver_add('["amp"]')
+    d.driver.type = 'AVERAGE'
+    varr = d.driver.variables.new()
+    varr.name = "z_pos"
+    varr.targets[0].id = obj
+    varr.targets[0].data_path = freqBone.path_from_id('location') + "["+str(main)+"]"
+    d.update()
+
+    mecha.make_property(endBone, name = "c_amp", default = 0.0, min=-2, max=2,overridable=True)
+    d = endBone.driver_add('["c_amp"]')
+    d.driver.type = 'AVERAGE'
+    varr = d.driver.variables.new()
+    varr.name = "x_pos"
+    varr.targets[0].id = obj
+    varr.targets[0].data_path = freqBone.path_from_id('location') + "["+str(second)+"]"
+    d.update()
+
     mecha.make_property(endBone, name = "freq", default = 0.0, min=-5, max=5,overridable=True)
+    d = endBone.driver_add('["freq"]')
+    d.driver.type = 'AVERAGE'
+    varr = d.driver.variables.new()
+    varr.name = "y_pos"
+    varr.targets[0].id = obj
+    varr.targets[0].data_path = freqBone.path_from_id('location') + "[1]"
+    d.update()
+
     mecha.make_property(endBone, name = "offset", default = 0.0, min=-5, max=5,overridable=True)
-    print("properties added to:", endBone.name)
+
+    print("properties and drivers added to:", endBone.name)
     
 
     
@@ -66,7 +92,7 @@ def create_WaveTail(obj,selection,dsp,sprl,freq):
         
         bone.rotation_mode = 'XYZ'
         #driver on X
-        d = bone.driver_add('rotation_euler', 0) 
+        d = bone.driver_add('rotation_euler', main)
         d.driver.expression =  "sin((fac  -  " + str(c_ind) + " - off"+ ")*freq" + ")/"+ str(round(l/c_ind,2) )  + " * amp  " 
         
         #create amp variable
@@ -97,7 +123,7 @@ def create_WaveTail(obj,selection,dsp,sprl,freq):
         
         
         #driver on z
-        d = bone.driver_add('rotation_euler', 2) 
+        d = bone.driver_add('rotation_euler', second)
         d.driver.expression =  "cos((fac   - " + str(c_ind)  + "- off"+ ")*freq" + ")/ "+ str(round(l/c_ind,2) )   + " * (amp * c_amp) " 
         #create amp variable
         var = d.driver.variables.new()
@@ -165,12 +191,20 @@ class create_WaveTailOperator(bpy.types.Operator):
     dsp_bone: bpy.props.StringProperty()
     sprl_bone: bpy.props.StringProperty()
     freq_bone: bpy.props.StringProperty()
+    axis: bpy.props.EnumProperty(
+        items=[('X', 'X axis', ''),
+               ('Z', 'z axis', '')],
+        default='X')
 
 
     def execute(self, context):
 
-        if self.dsp_bone and self.sprl_bone and self.freq_bone:
-            create_WaveTail(context.object, bpy.context.selected_editable_bones, self.dsp_bone, self.sprl_bone,self.freq_bone)
+        if self.dsp_bone and self.sprl_bone and self.freq_bone and self.axis:
+            if self.axis == "X":
+                create_WaveTail(context.object, bpy.context.selected_editable_bones, self.dsp_bone, self.sprl_bone,self.freq_bone,0,2)
+            else:
+                create_WaveTail(context.object, bpy.context.selected_editable_bones, self.dsp_bone, self.sprl_bone,self.freq_bone, 2, 0)
+
             self.report({'INFO'}, "generated successfurlly yarr!" )
         else:
             self.report({'INFO'}, "something wrong matey?")
@@ -179,14 +213,27 @@ class create_WaveTailOperator(bpy.types.Operator):
 
     def invoke(self, context, event):
         wm = context.window_manager
-        return wm.invoke_props_dialog(self, width=400)
+        return wm.invoke_props_dialog(self, width=200)
 
     def draw(self, context):
         layout = self.layout
         layout.label(text="Select  bones:")
-        layout.prop_search(self, "dsp_bone", context.object.data, "bones", text="displace bone")
-        layout.prop_search(self, "sprl_bone", context.object.data, "bones", text="spiral bone")
-        layout.prop_search(self, "freq_bone", context.object.data, "bones", text="freq bone")
+
+        layout = self.layout.row()
+        layout.label(text="displace bone")
+        layout.prop_search(self, "dsp_bone", context.object.data, "bones", text="")
+
+        layout = self.layout.row()
+        layout.label(text="spiral bone")
+        layout.prop_search(self, "sprl_bone", context.object.data, "bones", text="")
+
+        layout = self.layout.row()
+        layout.label(text="freq bone")
+        layout.prop_search(self, "freq_bone", context.object.data, "bones", text="")
+
+        layout = self.layout.row()
+        layout.label(text="main axis")
+        layout.prop(self, 'axis', text="")
 
 
 

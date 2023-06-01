@@ -1,5 +1,6 @@
 import bpy
 import mathutils
+import math
 
 def create_dupeBones(obj,selection, prefix, newp):
     """duplicates a bone or bone chain and returns the names of new bones"""
@@ -42,6 +43,7 @@ def create_dupeBones(obj,selection, prefix, newp):
 
 
 def add_follow(obj,selection, Prefix, space):
+
     if isinstance(selection, bpy.types.EditBone):
         selectedBones = []
         selectedBones.append(selection)
@@ -57,7 +59,42 @@ def add_follow(obj,selection, Prefix, space):
         constraint.owner_space = space
 
 
-def add_IK(obj, selection):
+def add_widgetToBones(selection, wgtName=None, wgtScale=None, wgtPos=None, wgtRot=None):
+    """adds a widged if inserted a objectname"""
+    poseBones = []
+    if isinstance(selection, bpy.types.PoseBone):
+        poseBones.append(selection)
+    else:
+        poseBones = selection
+    if wgtName:
+        for bone in poseBones:
+            if wgtName in bpy.data.objects:
+                print("ahoy matey!, custom mesh found")
+                bone.custom_shape = bpy.data.objects[wgtName]
+
+            else:
+                print("arrr... not a correct name  for ", wgtName)
+                break
+    else:
+        for bone in poseBones:
+            print("arr... no widget on bones", bone.name)
+            bone.custom_shape = None
+            break
+    if wgtScale:
+        for bone in poseBones:
+            for axis in range(3):
+                bone.custom_shape_scale_xyz[axis] = wgtScale[axis]
+    if wgtPos:
+        for bone in poseBones:
+            for axis in range(3):
+                bone.custom_shape_translation[axis] = wgtPos[axis]
+    if wgtRot:
+        for bone in poseBones:
+            for axis in range(3):
+                bone.custom_shape_rotation_euler[axis] = math.radians(wgtRot[axis])
+
+        pass
+def add_IK(obj, selection,ikWgt = None,poleWgt = None):
     """creates an ik chain from 3 bones and adds a pole bone"""
     pbone = obj.pose.bones
 
@@ -123,6 +160,11 @@ def add_IK(obj, selection):
     constraint.chain_count = 2
     constraint.pole_angle = poleAngle
 
+    #add widget to target and pole
+    add_widgetToBones(ikTarget,ikWgt,(1/2,1/2,1/2))
+    add_widgetToBones(ikPole,poleWgt,(1/4,1/4,1/4))
+
+
 
 def find_Head(selection):
     for bone in selection:
@@ -133,7 +175,7 @@ def find_Head(selection):
             return bone
 
 
-import bpy
+
 def find_Tail(selection):
     for bone in selection:
         if not any(bone.children):
@@ -144,11 +186,20 @@ def find_Tail(selection):
                 print("found tail of the chain", bone.name)
                 return bone
 
-def find_BonesByName(obj,selection, type):
-    foundBones = []
-    for name in selection:
-        foundBones.append(obj.pose.bones[name])
-    return foundBones
+
+def find_BonesByName(obj, names, type):
+    if type == 'POSE':
+        for i in range(len(names)):
+            names[i] = obj.pose.bones[names[i]]
+    if type == 'EDIT':
+        for i in range(len(names)):
+            names[i] = obj.data.edit_bones[names[i]]
+    return names
+
+def get_namesByBone(bones):
+    for i in range (len(bones)):
+        bones[i] = bones[i].name
+    return bones
 def select_ByConstraint(selection, cname):
     bones = []
     for bone in selection:
@@ -156,6 +207,6 @@ def select_ByConstraint(selection, cname):
             print("keep")
         else:
             bpy.context.active_object.data.bones[bone.name].select = False
-            bones.apend(bone)
+            bones.append(bone)
 
 
