@@ -75,7 +75,8 @@ class VIEW3D_MixamoUI(bpy.types.Panel):
     bl_order = 1
     @classmethod
     def poll(cls, context):
-        return context.object.mode == 'POSE'
+        if context.object:
+            return context.object.mode == 'POSE'
     def draw(self, context):
         if (bpy.context.mode == 'POSE'):
             self.layout.operator('rename.mixtoblend',

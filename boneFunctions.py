@@ -137,8 +137,11 @@ def add_IK(obj, selection,ikWgt = None,poleWgt = None):
     ikEnd = ikEnd.name
     ikBone = ikBone.name
 
-    # set pose mode
+    # update first
 
+    # update refernces
+    obj.update_from_editmode()
+    #switch modes
     bpy.ops.object.mode_set(mode='POSE')
 
     # copy transforms for the ik bones
@@ -163,6 +166,7 @@ def add_IK(obj, selection,ikWgt = None,poleWgt = None):
     #add widget to target and pole
     add_widgetToBones(ikTarget,ikWgt,(1/2,1/2,1/2))
     add_widgetToBones(ikPole,poleWgt,(1/4,1/4,1/4))
+    return ikPole
 
 
 
@@ -187,16 +191,23 @@ def find_Tail(selection):
                 return bone
 
 
-def find_BonesByName(obj, names, type):
+def find_BonesByName(obj, names,type):
+
+    # update shit this  function is so good
+    list = []
     if type == 'POSE':
+
         for i in range(len(names)):
-            names[i] = obj.pose.bones[names[i]]
+            list.append(obj.pose.bones[names[i]])
+
     if type == 'EDIT':
         for i in range(len(names)):
-            names[i] = obj.data.edit_bones[names[i]]
-    return names
+            list.append(obj.data.edit_bones[names[i]])
+
+    return list
 
 def get_namesByBone(bones):
+
     for i in range (len(bones)):
         bones[i] = bones[i].name
     return bones

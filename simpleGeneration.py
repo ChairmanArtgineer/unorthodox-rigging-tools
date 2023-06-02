@@ -8,21 +8,39 @@ from . import linkAndAppend as lna
 
 def create_IkFk(obj,selection,fkPrefix,ikPrefix,fkWgt=None,ikWgt=None,poleWgt=None):
 
-
     #create fk chain
     fk_chain = bnf.create_dupeBones(obj, selection, fkPrefix, True)
     ik_chain = bnf.create_dupeBones(obj, selection, ikPrefix, True)
 
+    # update refernces
+    obj.update_from_editmode()
+    ikNames = bnf.find_BonesByName(obj, ik_chain, "POSE")
+
     ik_chain = bnf.find_BonesByName(obj, ik_chain, "EDIT")
     fk_chain = bnf.find_BonesByName(obj, fk_chain, "POSE")
 
-    bnf.add_IK(obj, ik_chain,ikWgt,poleWgt)
+
+    #set widgets
+    ikpole = bnf.add_IK(obj, ik_chain,ikWgt,poleWgt)
+
     bnf.add_widgetToBones(fk_chain,fkWgt,(1/2,1/2,1/2))
 
 
-    
+
+
+
+    # update shit this  function is so good
+
+
+
+
+
+    #set drivers in widget scales
+
     #create custom prop on the end bone 
     target = bnf.find_Tail(bpy.context.selected_pose_bones)
+
+
     p_name = "Follow"
     follow_p = mecha.make_property(target,
     name = p_name, 
@@ -34,11 +52,43 @@ def create_IkFk(obj,selection,fkPrefix,ikPrefix,fkWgt=None,ikWgt=None,poleWgt=No
     description=None, 
     overridable=True)
     #////
-    
-    follow_p = 1.0
+
+    # set drivers for fk widdigets
+    for bone in fk_chain:
+        for axis in range(3):
+            ogscle = bone.custom_shape_scale_xyz[axis]
+            d = bone.driver_add('custom_shape_scale_xyz', axis)
+            d.driver.expression = "var * " + str(ogscle)
+
+            var = d.driver.variables.new()
+            var.name = "var"
+            var.targets[0].id = obj
+            var.targets[0].data_path = target.path_from_id('["Follow"]')
+        # set drivers for fk widdigets
+
+    #set drivers for the ik widgets
+    for bone in ikNames:
+        for axis in range(3):
+            ogscle = bone.custom_shape_scale_xyz[axis]
+            d = bone.driver_add('custom_shape_scale_xyz', axis)
+            d.driver.expression = "(1-var) * " + str(ogscle)
+
+            var = d.driver.variables.new()
+            var.name = "var"
+            var.targets[0].id = obj
+            var.targets[0].data_path = target.path_from_id('["Follow"]')
+    #add driver to ik pole
+
+    for axis in range(3):
+        d = ikpole.driver_add('custom_shape_scale_xyz', axis)
+        d.driver.expression = "(1-var) * " + str(ogscle)
+        var = d.driver.variables.new()
+        var.name = "var"
+        var.targets[0].id = obj
+        var.targets[0].data_path = target.path_from_id('["Follow"]')
     
     #apply driver to each bone
-    for bone in bpy.context.selected_pose_bones: 
+    for bone in bpy.context.selected_pose_bones:
         #create fk follow
         constraint = bone.constraints.new('COPY_TRANSFORMS')
         constraint.name = fkPrefix + p_name
@@ -155,6 +205,7 @@ class create_IkFkOperator(bpy.types.Operator):
         return wm.invoke_props_dialog(self, width=200)
 
     def draw(self, context):
+
         layout = self.layout
         layout.label(text="only works ith 3 bones")
         layout.label(text="set prefixes:")
@@ -200,7 +251,8 @@ class VIEW3D_SimpleGen_UI(bpy.types.Panel):
     #bl_options = {'HIDE_HEADER'}
     @classmethod
     def poll(cls, context):
-        return context.object.mode == 'EDIT'
+        if context.object:
+            return context.object.mode == 'EDIT'
     def draw(self, context):
 
 
