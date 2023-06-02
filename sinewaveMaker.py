@@ -216,6 +216,7 @@ class create_WaveTailOperator(bpy.types.Operator):
         return wm.invoke_props_dialog(self, width=200)
 
     def draw(self, context):
+        context.object.update_from_editmode()
         layout = self.layout
         layout.label(text="Select  bones:")
 

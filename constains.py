@@ -63,7 +63,8 @@ class VIEW3D_constraint_UI(bpy.types.Panel):
    # bl_options = {'HIDE_HEADER'}
     @classmethod
     def poll(cls, context):
-        return context.object.mode == 'POSE'
+        if bpy.context.object:
+            return context.object.mode == 'POSE'
     def draw(self, context):
         if (bpy.context.mode == 'POSE'):
 
