@@ -4,6 +4,7 @@ import mathutils
 from . import boneFunctions as bnf
 from . import sinewaveMaker as swm
 from . import linkAndAppend as lna
+from . import twisterBones as twst
 
 
 def create_IkFk(obj,selection,fkPrefix,ikPrefix,fkWgt=None,ikWgt=None,poleWgt=None):
@@ -267,12 +268,14 @@ class VIEW3D_SimpleGen_UI(bpy.types.Panel):
         col.operator('create.wavetail',
                      icon='FORCE_HARMONIC')
 
+
         col = self.layout.column()
         col.label(text="build blocks")
         col.operator('create.ikfk',
                      icon='GP_MULTIFRAME_EDITING')
         col.operator('create.ctrl',icon='GP_MULTIFRAME_EDITING')
         col.operator('add.ik',icon='CON_KINEMATIC')
+        col.operator('create.twister', icon= 'MOD_SCREW')
 
 
         col.separator()
@@ -286,7 +289,8 @@ create_IkFkOperator,
 add_IkOperator,
 create_Ctrl,
 swm.create_WaveTailOperator,
-lna.get_WGTFromFile
+lna.get_WGTFromFile,
+twst.create_TwisterOperator
 ]
 
 def register():
