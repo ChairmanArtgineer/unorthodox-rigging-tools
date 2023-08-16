@@ -207,10 +207,10 @@ def find_BonesByName(obj, names,type):
     return list
 
 def get_namesByBone(bones):
-
+    names = []
     for i in range (len(bones)):
-        bones[i] = bones[i].name
-    return bones
+        names.append(bones[i].name)
+    return names
 def select_ByConstraint(selection, cname):
     bones = []
     for bone in selection:
