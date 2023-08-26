@@ -3,9 +3,9 @@
 import bpy 
 import mathutils
 Vector = mathutils.Vector
+from . import boneFunctions as bnf
 
-
-def create_muscle(muscleBone, obj):
+def create_muscle(muscleBone, obj,wgt=None):
 
     #just update the fkn references
     bpy.context.object.update_from_editmode()
@@ -103,6 +103,7 @@ def create_muscle(muscleBone, obj):
     oconstraint.target_space = 'LOCAL'
     oconstraint.owner_space = 'LOCAL'
     oconstraint.influence = 0.5
+    oconstraint.use_offset = True
 
     # add stretch constraint to muscle Driver
 
@@ -110,19 +111,24 @@ def create_muscle(muscleBone, obj):
     sconstraint.target = obj
     sconstraint.subtarget = muscleTip
 
-    #create muscle offset bone(muscle joint head)
+    #add widgets to muscle  oirigin,insertion and offset
+    bnf.add_widgetToBones([obj.pose.bones[muscleOffset], obj.pose.bones[muscleInsertion.name], obj.pose.bones[muscleOrigin.name]], wgt, (0.5,0.5,0.5))
+
+
 
 
 class create_MuscleOperator(bpy.types.Operator):
     """creates  wavetail rig to control chain bones """
     bl_idname = "create.muscle"
     bl_label = "create muscle group"
+    #class variables
+    musclewgt: bpy.props.StringProperty()
 
     def execute(self, context):
 
         if bpy.context.active_bone:
 
-            create_muscle(context.active_bone.name, context.object)
+            create_muscle(context.active_bone.name, context.object,self.musclewgt)
             self.report({'INFO'}, "generated successfurlly yarr!")
         else:
 
@@ -131,12 +137,16 @@ class create_MuscleOperator(bpy.types.Operator):
 
     def invoke(self, context, event):
         wm = context.window_manager
-        return wm.invoke_props_dialog(self, width=100)
+        return wm.invoke_props_dialog(self, width=200)
         pass
 
     def draw(self, context):
         layout = self.layout
-        layout.label(text="create muscle idk")
+        layout.label(text="create muscle group bones")
+        layout = self.layout.row()
+        layout.label(text="muscle group widget")
+        layout.prop_search(self, "musclewgt", bpy.data, "objects", text="")
+
         pass
 
 

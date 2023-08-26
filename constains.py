@@ -80,9 +80,8 @@ class VIEW3D_constraint_UI(bpy.types.Panel):
                          icon='CONSTRAINT_BONE')
             col.operator('select.byc',
                          icon='CONSTRAINT_BONE')
-            #col.prop(context.scene.constraintProps,'cname')
-            col.prop_search(context.scene.constraintProps, "cname", context.active_pose_bone, "constraints", text="")
-
+            col.prop(context.scene.constraintProps,'cname')
+            #col.prop_search(context.scene.constraintProps, "cname", context.active_pose_bone, "constraints", text="")
 
 
 
