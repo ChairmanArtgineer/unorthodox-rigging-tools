@@ -5,6 +5,7 @@ from . import boneFunctions as bnf
 from . import sinewaveMaker as swm
 from . import linkAndAppend as lna
 from . import twisterBones as twst
+from . import muscleGroup as msc
 
 
 def create_IkFk(obj,selection,fkPrefix,ikPrefix,fkWgt=None,ikWgt=None,poleWgt=None):
@@ -267,6 +268,7 @@ class VIEW3D_SimpleGen_UI(bpy.types.Panel):
         col.label(text = "custom rigs")
         col.operator('create.wavetail',
                      icon='FORCE_HARMONIC')
+        col.operator('create.muscle', icon= 'META_ELLIPSOID')
 
 
         col = self.layout.column()
@@ -284,13 +286,16 @@ class VIEW3D_SimpleGen_UI(bpy.types.Panel):
         pass
 
 BlenderClasses =[
+
 VIEW3D_SimpleGen_UI,
 create_IkFkOperator,
 add_IkOperator,
 create_Ctrl,
 swm.create_WaveTailOperator,
 lna.get_WGTFromFile,
-twst.create_TwisterOperator
+twst.create_TwisterOperator,
+msc.create_MuscleOperator
+
 ]
 
 def register():
