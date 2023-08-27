@@ -68,7 +68,7 @@ def create_muscle(muscleBone, obj,wgt=None):
     muscleDriver = bpy.context.active_object.data.edit_bones[muscleDriver]
 
     muscleOffset.head = muscleBone.head
-    muscleOffset.tail = muscleOffset.head + Vector([0,0,1])
+    muscleOffset.tail = muscleOffset.head + Vector([0,0,0.05])
 
     muscleDriver.head = muscleBone.head
     muscleDriver.tail = muscleBone.tail
