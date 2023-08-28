@@ -14,7 +14,7 @@ def create_muscle(muscleBone, obj,wgt=None):
 
     #input a bone, this is the muscle bone
     muscleBone = obj.data.edit_bones[muscleBone]
-
+    muscleLength = muscleBone.length
 
 
 
@@ -32,10 +32,10 @@ def create_muscle(muscleBone, obj,wgt=None):
     muscleInsertion = bpy.context.active_object.data.edit_bones[muscleInsertion]
 
     muscleOrigin.head = origin
-    muscleOrigin.tail = origin  + Vector([0,0,1])
+    muscleOrigin.tail = origin  + Vector([0,0,muscleLength/4])
 
     muscleInsertion.head = insertion
-    muscleInsertion.tail = insertion  + Vector([0,0,1])
+    muscleInsertion.tail = insertion  + Vector([0,0,muscleLength/4])
 
 
     #set said bone head to the middle point of itself
@@ -68,7 +68,7 @@ def create_muscle(muscleBone, obj,wgt=None):
     muscleDriver = bpy.context.active_object.data.edit_bones[muscleDriver]
 
     muscleOffset.head = muscleBone.head
-    muscleOffset.tail = muscleOffset.head + Vector([0,0,1])
+    muscleOffset.tail = muscleOffset.head + Vector([0,0,muscleLength/4])
 
     muscleDriver.head = muscleBone.head
     muscleDriver.tail = muscleBone.tail
