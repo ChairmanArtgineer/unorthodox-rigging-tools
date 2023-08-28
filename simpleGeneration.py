@@ -262,7 +262,7 @@ class VIEW3D_SimpleGen_UI(bpy.types.Panel):
         if 'URT_WGTS' not in bpy.data.collections:
             layout = self.layout.column()
             layout.operator('get.wgt',
-                         icon='FORCE_HARMONIC')
+                         icon='OUTLINER_COLLECTION')
 
         col = self.layout.column()
         col.label(text = "custom rigs")

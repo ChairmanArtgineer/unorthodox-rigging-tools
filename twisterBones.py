@@ -80,15 +80,16 @@ class create_TwisterOperator(bpy.types.Operator):
                     print("mirror on")
                     # check that only one bone for each side selected
                     if len(context.selected_bones) == 2:
-
+                        selection = []
                         for bone in context.selected_bones:
-                            create_Twister(self.n_cuts, bone.name, bone.name, True)
+                            selection.append(bone.name)
+                        # remove mirror before generation, otherwise ungodly behaviour....
+                        context.object.data.use_mirror_x = False
+                        for bone in selection:
+                            bpy.ops.object.mode_set(mode='EDIT')
+                            create_Twister(self.n_cuts, bone, bone, True)
                             self.report({'INFO'}, "generated successfurlly yarr!")
                             # return to edit mode in order to
-                            bpy.ops.object.mode_set(mode='EDIT')
-                    else:
-                        self.report({'INFO'}, "something wrong matey?")
-                        return {'FINISHED'}
 
                 else:
                     print("mirror off")
@@ -105,6 +106,8 @@ class create_TwisterOperator(bpy.types.Operator):
                         selection = []
                         for bone in context.selected_bones:
                             selection.append(bone.name)
+                        # remove mirror before generation, otherwise ungodly behaviour....
+                        context.object.data.use_mirror_x = False
                         # execute the code for the selected bones
                         create_Twister(self.n_cuts, selection[2], selection[0])
                         self.report({'INFO'}, "generated successfurlly yarr!")
