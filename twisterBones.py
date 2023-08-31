@@ -27,9 +27,16 @@ def create_Twister(cuts, drv, og, inverse=False):
     bpy.ops.armature.subdivide(number_cuts=cuts)
 
     # get the new bones names
+    twistBones = []
+    # create an iterable int
+    for bone in bpy.context.selected_bones:
+        # organize bone chain order
+        twistBones.insert(1, bone.name)
+        bone.use_connect = False
+        bone.parent = Ebones[og]
+        bone.use_connect = False
 
-    #twstBones = bpy.context.selected_bones
-
+    bpy.ops.armature.select_all(action='DESELECT')
     # switch to pose mode
 
     bpy.ops.object.mode_set(mode='POSE')
@@ -38,32 +45,36 @@ def create_Twister(cuts, drv, og, inverse=False):
 
     Pbones[driverBone].rotation_mode = 'XYZ'
     Pbones[ogBone].rotation_mode = 'XYZ'
+    # count variable in driver
+    print(twistBones)
+    i = 1
+    for bone in twistBones:
 
-    for bone in bpy.context.selected_pose_bones:
-
-        bone.rotation_mode = 'XYZ'
+        Pbones[bone].rotation_mode = 'XYZ'
 
         # number of bones
-        l = len(bpy.context.selected_pose_bones)
+        l = len(twistBones)
         # create driver on bone
-        d = bone.driver_add('rotation_euler', 1)
+        d = Pbones[bone].driver_add('rotation_euler', 1)
         # create twist variable
         var = d.driver.variables.new()
         var.name = "twist"
         var.targets[0].id = bpy.context.active_object
         var.targets[0].data_path = Pbones[driverBone].path_from_id('rotation_euler') + "[1]"
 
-        if inverse and bone.name == "TWST_" + ogBone:
-            d.driver.expression = "twist/" + str((l + 1) * 2) + "-twist"
+        if inverse:
+            d.driver.expression = "twist * " + str(round(1 / l * i, 2)) + "-twist"
 
         else:
-            d.driver.expression = "twist / " + str(l + 1)
+            d.driver.expression = "twist * " + str(round(1 / l * i, 2))
+        i += 1
 
         # print a finish or smt idk
+        bpy.ops.pose.select_all(action='DESELECT')
 
 
 class create_TwisterOperator(bpy.types.Operator):
-    """creates  wavetail rig to control chain bones """
+    """creates  a set of twister bones for the selected bones """
     bl_idname = "create.twister"
     bl_label = "create twister bones"
 

@@ -5,7 +5,7 @@ import mathutils
 Vector = mathutils.Vector
 from . import boneFunctions as bnf
 
-def create_muscle(muscleBone, obj,wgt=None):
+def create_muscle(muscleBone, obj,wgt=None,muscleWgt=None):
 
     #just update the fkn references
     bpy.context.object.update_from_editmode()
@@ -113,22 +113,24 @@ def create_muscle(muscleBone, obj,wgt=None):
 
     #add widgets to muscle  oirigin,insertion and offset
     bnf.add_widgetToBones([obj.pose.bones[muscleOffset], obj.pose.bones[muscleInsertion.name], obj.pose.bones[muscleOrigin.name]], wgt, (0.5,0.5,0.5))
+    bnf.add_widgetToBones(obj.pose.bones[muscleBone.name], muscleWgt, (1, 1, 1))
 
 
 
 
 class create_MuscleOperator(bpy.types.Operator):
-    """creates  wavetail rig to control chain bones """
+    """creates  a muscle group system from a selected bone """
     bl_idname = "create.muscle"
     bl_label = "create muscle group"
     #class variables
     musclewgt: bpy.props.StringProperty()
+    helperWgt: bpy.props.StringProperty()
 
     def execute(self, context):
 
         if bpy.context.active_bone:
 
-            create_muscle(context.active_bone.name, context.object,self.musclewgt)
+            create_muscle(context.active_bone.name, context.object, self.musclewgt, self.helperWgt)
             self.report({'INFO'}, "generated successfurlly yarr!")
         else:
 
@@ -144,8 +146,11 @@ class create_MuscleOperator(bpy.types.Operator):
         layout = self.layout
         layout.label(text="create muscle group bones")
         layout = self.layout.row()
-        layout.label(text="muscle group widget")
+        layout.label(text="group widgets")
         layout.prop_search(self, "musclewgt", bpy.data, "objects", text="")
+        layout = self.layout.row()
+        layout.label(text="helper widget")
+        layout.prop_search(self, "helperWgt", bpy.data, "objects", text="")
 
         pass
 

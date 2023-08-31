@@ -221,3 +221,24 @@ def select_ByConstraint(selection, cname):
             bones.append(bone)
 
 
+def set_mirrorByPos(selection, margin=0.01):
+    # create a list for the left side bones and right side
+    leftBones = []
+    rightBones = []
+
+    # autoasign LEFT suffix to bones on left side of the mesh and assign the bones to their lists
+    for bone in selection:
+        if bone.head.x > margin:
+            bone.name += ".L"
+            leftBones.append(bone)
+
+        elif bone.head.x < margin:
+            rightBones.append(bone)
+
+    # rename bones based on position
+
+    for Rbone in rightBones:
+        for Lbone in leftBones:
+            if Rbone.head.x == Lbone.head.x * -1:
+                Rbone.name = Lbone.name[:-2] + ".R"
+    return [leftBones, rightBones]
