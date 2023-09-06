@@ -6,6 +6,7 @@ from . import sinewaveMaker as swm
 from . import linkAndAppend as lna
 from . import twisterBones as twst
 from . import muscleGroup as msc
+from . import ribbons as rbb
 
 
 def create_IkFk(obj,selection,fkPrefix,ikPrefix,fkWgt=None,ikWgt=None,poleWgt=None):
@@ -136,19 +137,23 @@ class create_Ctrl(bpy.types.Operator):
 
     prefix: bpy.props.StringProperty()
     wgt: bpy.props.StringProperty()
-    useParent: bpy.props.BoolProperty(default= True)
     space: bpy.props.EnumProperty(
         items=[('WORLD', 'world space', ''),
                ('LOCAL', 'local space', '')],
         default= 'WORLD'
     )
+    type: bpy.props.EnumProperty(
+        items=[('CHILD_OF', 'Child Of ', ''),
+               ('COPY_TRANSFORMS', 'Copy Transforms', '')],
+        default='COPY_TRANSFORMS'
+    )
 
     def execute(self, context):
 
-        if self.prefix and self.useParent:
-            fkchain = bnf.create_dupeBones(context.object,context.selected_bones,self.prefix,self.useParent)
+        if self.prefix:
+            fkchain = bnf.create_dupeBones(context.object,context.selected_bones,self.prefix)
             bpy.ops.object.mode_set(mode = 'POSE')
-            bnf.add_follow(context.object,context.selected_pose_bones,self.prefix,self.space)
+            bnf.add_follow(context.object,context.selected_pose_bones,self.prefix,self.space, self.type)
             fkchain = bnf.find_BonesByName(context.object,fkchain,"POSE")
             bnf.add_widgetToBones(fkchain,self.wgt)
             self.report({'INFO'}, "generated successfurlly yarr!")
@@ -159,7 +164,7 @@ class create_Ctrl(bpy.types.Operator):
 
     def invoke(self, context, event):
         wm = context.window_manager
-        return wm.invoke_props_dialog(self, width=200)
+        return wm.invoke_props_dialog(self, width=300)
 
     def draw(self, context):
         layout = self.layout
@@ -170,16 +175,18 @@ class create_Ctrl(bpy.types.Operator):
         layout.prop(self, 'prefix', text="")
 
         layout = self.layout.row()
-        layout.label(text="ctrl space")
-        layout.prop(self, 'space', text="")
+        layout.label(text="constraint type")
+        layout.prop(self, 'type', text="")
+        if self.type == 'COPY_TRANSFORMS':
+            layout = self.layout.row()
+            layout.label(text="ctrl space")
+            layout.prop(self, 'space', text="")
 
         layout = self.layout.row()
         layout.label(text="widget for all")
         layout.prop_search(self, "wgt", bpy.data, "objects", text="")
 
-        layout = self.layout.row()
-        layout.label(text="use new parent")
-        layout.prop(self, 'useParent', text=" ")
+
 
 class create_IkFkOperator(bpy.types.Operator):
     """ creates an ik and fk chain with a follow property """
@@ -277,7 +284,8 @@ class VIEW3D_SimpleGen_UI(bpy.types.Panel):
                      icon='GP_MULTIFRAME_EDITING')
         col.operator('create.ctrl',icon='GP_MULTIFRAME_EDITING')
         col.operator('add.ik',icon='CON_KINEMATIC')
-        col.operator('create.twister', icon= 'MOD_SCREW')
+        col.operator('create.twister', icon='MOD_SCREW')
+        col.operator('create.ribbon', icon='OUTLINER_OB_GREASEPENCIL')
 
 
         col.separator()
@@ -294,8 +302,8 @@ create_Ctrl,
 swm.create_WaveTailOperator,
 lna.get_WGTFromFile,
 twst.create_TwisterOperator,
-msc.create_MuscleOperator
-
+msc.create_MuscleOperator,
+rbb.create_RibbonOperator
 ]
 
 def register():

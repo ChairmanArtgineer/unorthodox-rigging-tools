@@ -2,8 +2,13 @@ import bpy
 import mathutils
 import math
 
-def create_dupeBones(obj,selection, prefix, newp):
-    """duplicates a bone or bone chain and returns the names of new bones"""
+def create_dupeBones(obj,selection, prefix):
+    """duplicates a bone or bone chain and returns the names of new bones
+    :param obj: active armature
+    :param selection: list of bones in editBone type
+    :param prefix: prefix for the new bones
+    :return: the list of new bones generated
+    """
     if obj.type == 'ARMATURE' and obj.mode == 'EDIT':
 
         # if single bone append to list
@@ -25,16 +30,13 @@ def create_dupeBones(obj,selection, prefix, newp):
             new_bone.tail = bone.tail
             new_bone.roll = bone.roll
             new_bone.use_deform = False
-            if newp:
-                if bone.parent:
+            if bone.parent:
+                if prefix + bone.parent.name in obj.data.bones:
                     new_bone.parent = obj.data.edit_bones[prefix + bone.parent.name]
                     new_bone.use_connect = bone.use_connect
                 else:
-                    pass
-            else:
-                if bone.parent:
                     new_bone.parent = obj.data.edit_bones[bone.parent.name]
-                    new_bone.use_connect = bone.use_connect
+
             newBones.append(new_bone.name)
         # update refs
         obj.update_from_editmode()
@@ -42,8 +44,14 @@ def create_dupeBones(obj,selection, prefix, newp):
         # select only the new chain
 
 
-def add_follow(obj,selection, Prefix, space):
-
+def add_follow(obj,selection, Prefix, space, type):
+    """
+    adds a followw
+    :param obj:
+    :param selection:
+    :param Prefix:
+    :param space:
+    """
     if isinstance(selection, bpy.types.EditBone):
         selectedBones = []
         selectedBones.append(selection)
@@ -51,12 +59,17 @@ def add_follow(obj,selection, Prefix, space):
         # equal list
         selectedBones = selection
     for bone in selectedBones:
-        constraint = bone.constraints.new('COPY_TRANSFORMS')
-        constraint.name = Prefix + "follow"
-        constraint.target = obj
-        constraint.subtarget = Prefix + bone.name
-        constraint.target_space = space
-        constraint.owner_space = space
+        if type == "COPY_TRANSFORMS":
+            constraint = bone.constraints.new('COPY_TRANSFORMS')
+            constraint.name = Prefix + "follow"
+            constraint.target = obj
+            constraint.subtarget = Prefix + bone.name
+            constraint.target_space = space
+            constraint.owner_space = space
+        if type == "CHILD_OF":
+            constraint = bone.constraints.new('CHILD_OF')
+            constraint.target = obj
+            constraint.subtarget = Prefix + bone.name
 
 
 def add_widgetToBones(selection, wgtName=None, wgtScale=None, wgtPos=None, wgtRot=None):
@@ -171,6 +184,11 @@ def add_IK(obj, selection,ikWgt = None,poleWgt = None):
 
 
 def find_Head(selection):
+    """
+    finds the head in a chain of bones
+    :param selection: list of bones in a chain
+    :return: chain head
+    """
     for bone in selection:
         if bone.parent in selection:
             pass
@@ -181,6 +199,11 @@ def find_Head(selection):
 
 
 def find_Tail(selection):
+    """
+    finds the tail bone in a chain of bones
+    :param selection: list of bones in a chain
+    :return: the tail of the chain
+    """
     for bone in selection:
         if not any(bone.children):
             print("found tail of the chain", bone.name)
@@ -192,7 +215,13 @@ def find_Tail(selection):
 
 
 def find_BonesByName(obj, names,type):
-
+    """
+    finds bones by names given and returns them in a list
+    :param obj: active armature
+    :param names: list of bone names
+    :param type: pose or edit type bones to return
+    :return: list of bones in the specified type
+    """
     # update shit this  function is so good
     list = []
     if type == 'POSE':
@@ -206,7 +235,53 @@ def find_BonesByName(obj, names,type):
 
     return list
 
+
+def find_closestBones(obj, selection, target, nBones):
+    """
+    find the closest bones to target bone
+    :param obj: active armature
+    :param selection: list of bones by name
+    :param target: target bone by name
+    :param nBones: number of the closest bones to return
+    :return: list of the closest bones sorted by order
+    """
+    # update just for safety
+    obj.update_from_editmode()
+
+    if target in obj.data.bones:
+        targetBone = obj.data.bones[target]
+        # Create a dictionary to store bone names and their distances
+        boneDistances = {}
+
+        # Iterate through all bones in the obj
+        for bone in selection:
+            if bone != target:
+                # Calculate the distance between the target bone's head and the current bone's head
+                distance = (obj.data.bones[bone].head - targetBone.head).length
+                boneDistances[obj.data.bones[bone].name] = distance
+
+        # Sort the dictionary by distances
+        sortedBones = sorted(boneDistances.items(), key=lambda x: x[1])
+
+        # print the bones in console for later debugging
+        print("yar! the closest" + str(nBones) + "to " + target + "are :")
+        for i in range(0, nBones):
+            print(sortedBones[i][0])
+
+        return [bone[0] for bone in sortedBones[:nBones]]
+        # Print the three closest bone names
+
+    else:
+        print("grr.... target bone not found in armature...")
+        # Get the three closest bones
+
+
 def get_namesByBone(bones):
+    """
+    gets the names of desired bones in a list
+    :param bones: list of bones in any type
+    :return: list of bone names
+    """
     names = []
     for i in range (len(bones)):
         names.append(bones[i].name)
@@ -222,6 +297,13 @@ def select_ByConstraint(selection, cname):
 
 
 def set_mirrorByPos(selection, margin=0.01):
+    """
+    auto sets mirror based on bone positions (very experimental)
+
+    :param selection: list of bones
+    :param margin: margin from the center to start naming
+    :return: bones from left side and bones from right side
+    """
     # create a list for the left side bones and right side
     leftBones = []
     rightBones = []
@@ -242,3 +324,30 @@ def set_mirrorByPos(selection, margin=0.01):
             if Rbone.head.x == Lbone.head.x * -1:
                 Rbone.name = Lbone.name[:-2] + ".R"
     return [leftBones, rightBones]
+
+def set_childofInverse(obj,selection,cname):
+    """
+    resets the inverse of a specified chilf of constraint in a chain of bones
+    :param obj: active armature
+    :param selection: list of bones in posebone type
+    :param cname: name of the childof constraint
+    """
+    for bone in selection:
+        for c in bone.constraints:
+            if c.type == "CHILD_OF" and c.subtarget and c.name == cname:
+                target = c.subtarget
+                c.inverse_matrix = obj.pose.bones[target].matrix.inverted()
+
+
+def sort_BoneOrder(selection):
+    newSelection = []
+    tailBone = find_Tail(bpy.context.selected_bones)
+    newSelection.append(tailBone.name)
+
+    for i in range(1, len(selection)):
+        if tailBone.parent:
+            tailBone = tailBone.parent
+            newSelection.insert(0, tailBone.name)
+        else:
+            newSelection.insert(0, tailBone.name)
+    return newSelection
