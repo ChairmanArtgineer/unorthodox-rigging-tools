@@ -91,9 +91,10 @@ class Reset_ChildInverseOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 class VIEW3D_constraint_UI(bpy.types.Panel):
+    bl_idname = "CONSTRAINT_PT_UI"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_parent_id = "MAIN_UI"
+    bl_parent_id = "MAIN_PT_UI"
     bl_category = "anti autodesk tools"
     bl_label = "constraint related"
    # bl_options = {'HIDE_HEADER'}

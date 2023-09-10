@@ -18,14 +18,15 @@ from . import simpleGeneration
 class VIEW3D_main_UI(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "anti autodesk tools"
+    bl_category = "unorthodox rigging"
     bl_label = "very unorthodox rigg tools"
-    bl_idname = "MAIN_UI"
+    bl_idname = "MAIN_PT_UI"
     bl_order = 0
 
     @classmethod
     def poll(cls, context):
-        return context.object.type == 'ARMATURE'
+        if context.object.type == 'ARMATURE':
+            return context.object.type == 'ARMATURE'
     def draw(self, context):
             pass
 

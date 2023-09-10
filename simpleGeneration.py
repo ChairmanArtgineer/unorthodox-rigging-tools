@@ -12,8 +12,8 @@ from . import ribbons as rbb
 def create_IkFk(obj,selection,fkPrefix,ikPrefix,fkWgt=None,ikWgt=None,poleWgt=None):
 
     #create fk chain
-    fk_chain = bnf.create_dupeBones(obj, selection, fkPrefix, True)
-    ik_chain = bnf.create_dupeBones(obj, selection, ikPrefix, True)
+    fk_chain = bnf.create_dupeBones(obj, selection, fkPrefix)
+    ik_chain = bnf.create_dupeBones(obj, selection, ikPrefix)
 
     # update refernces
     obj.update_from_editmode()
@@ -252,10 +252,11 @@ class add_IkOperator(bpy.types.Operator):
         return {'FINISHED'}
 
 class VIEW3D_SimpleGen_UI(bpy.types.Panel):
+    bl_idname = "SIMPLE_PT_GEN"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_parent_id = "MAIN_UI"
-    bl_category = "anti autodesk tools"
+    bl_parent_id = "MAIN_PT_UI"
+    bl_category = "unorthodox rigging"
     bl_label = "shelf related"
     #bl_options = {'HIDE_HEADER'}
     @classmethod

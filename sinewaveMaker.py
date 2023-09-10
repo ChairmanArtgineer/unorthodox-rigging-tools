@@ -13,7 +13,7 @@ def create_WaveTail(obj,selection,dsp,sprl,freq,main,second):
         
     #find head and create ctrl bone
     endBone = bnf.find_Head(selection)
-    bnf.create_dupeBones(obj,endBone, "CTRL_", True)
+    bnf.create_dupeBones(obj,endBone, "CTRL_")
 
     #set rotation mode
     for bone in bpy.context.selected_editable_bones:
