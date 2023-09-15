@@ -69,7 +69,7 @@ class RENAME_OT_Btom(bpy.types.Operator):
 class VIEW3D_MixamoUI(bpy.types.Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_parent_id = "MAIN_UI"
+    bl_parent_id = "MAIN_PT_UI"
     bl_category = "anti autodesk tools"
     bl_label = "mixamo renamer"
     bl_order = 1
