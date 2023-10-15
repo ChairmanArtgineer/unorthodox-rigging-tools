@@ -46,8 +46,8 @@ def create_dupeBones(obj,selection, prefix):
 
 def add_follow(obj,selection, Prefix, space, type):
     """
-    adds a followw
-    :param obj:
+    adds a follow to
+    :param obj: armature
     :param selection:
     :param Prefix:
     :param space:

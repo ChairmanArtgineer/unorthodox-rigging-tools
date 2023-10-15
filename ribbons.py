@@ -14,12 +14,13 @@ def create_ribbon(obj, selection, wgt=None):
     # get the bone list length
     l = len(selection)
 
-    # create a new list for rb bones
+    #  rb bones
     ribbonBones = []
 
     # for each bone in the chain....
-    print(selection)
+    print(f'[URT]:> bones selected for operation{selection}')
 
+    # create a new list for
     # get new name for the ribbon controllers
     newName = selection[0]
 
@@ -90,17 +91,62 @@ def create_ribbon(obj, selection, wgt=None):
     return ribbonBones
 
 
+def create_wrapBones(armature, selection, targetMesh, offsetBone=None):
+    #force set to edit mode just in case
+    bpy.ops.object.mode_set(mode='EDIT')
+    # definitions for easier access
+
+    pBones = armature.pose.bones
+    eBones = armature.data.edit_bones
+    newSelection = []
+    for bone in selection:
+        newSelection.append(bone)
+
+    # for each of the selected bones
+
+    for bone in newSelection:
+        # create a new wrap bone
+        wrapBone = bnf.create_dupeBones(armature, eBones[bone], "WRAP_")[0]
+
+        # change bone reference to its name
+        # set armature to pose mode
+        bpy.ops.object.mode_set(mode='POSE')
+
+        # add offset constraint to wrap bone
+        constraint = pBones[wrapBone].constraints.new('CHILD_OF')
+        constraint.target = armature
+        constraint.subtarget = offsetBone
+
+        # add shrinkwrap mod
+        constraint = pBones[wrapBone].constraints.new('SHRINKWRAP')
+        constraint.target = targetMesh
+        constraint.shrinkwrap_type = 'TARGET_PROJECT'
+
+        # parent og bone to wrap bone
+        constraint = pBones[bone].constraints.new('CHILD_OF')
+        constraint.target = armature
+        constraint.subtarget = wrapBone
+
+        # set armature to pose mode
+        bpy.ops.object.mode_set(mode='EDIT')
 class create_RibbonOperator(bpy.types.Operator):
     """creates  a ribbon chain from a chain of bones """
     bl_idname = "create.ribbon"
     bl_label = "create ribbon bones"
 
     wgt: bpy.props.StringProperty()
+    useWrap: bpy.props.BoolProperty(default=False)
+    wrapMesh: bpy.props.StringProperty()
+    offsetBone: bpy.props.StringProperty()
 
     def execute(self, context):
 
         if context.selected_bones:
             ribbonBOnes = create_ribbon(context.active_object, bnf.sort_BoneOrder(context.selected_bones), self.wgt)
+            if self.useWrap:
+                create_wrapBones(context.active_object, ribbonBOnes, context.scene.objects.get(self.wrapMesh), self.offsetBone)
+                pass
+
             return {'FINISHED'}
 
 
@@ -116,3 +162,9 @@ class create_RibbonOperator(bpy.types.Operator):
         layout = self.layout
         layout.label(text="widget")
         layout.prop_search(self, "wgt", bpy.data, "objects", text="")
+        layout.prop(self, 'useWrap', text="use wrap mesh")
+        if self.useWrap:
+            layout.label(text="target mesh")
+            layout.prop_search(self, "wrapMesh", bpy.data, "objects", text="")
+            layout.label(text="optional offet bone")
+            layout.prop_search(self, "offsetBone", context.object.data, "bones", text="")
