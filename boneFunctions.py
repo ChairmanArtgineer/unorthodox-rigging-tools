@@ -30,16 +30,17 @@ def create_dupeBones(obj,selection, prefix):
             new_bone.tail = bone.tail
             new_bone.roll = bone.roll
             new_bone.use_deform = False
+            # update bone refs
+            obj.update_from_editmode()
+            #set parents
             if bone.parent:
-                if prefix + bone.parent.name in obj.data.bones:
+                if obj.data.bones.get(prefix + bone.parent.name):
                     new_bone.parent = obj.data.edit_bones[prefix + bone.parent.name]
                     new_bone.use_connect = bone.use_connect
                 else:
                     new_bone.parent = obj.data.edit_bones[bone.parent.name]
 
             newBones.append(new_bone.name)
-        # update refs
-        obj.update_from_editmode()
         return newBones
         # select only the new chain
 
